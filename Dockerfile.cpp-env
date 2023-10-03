@@ -1,0 +1,82 @@
+FROM ubuntu:20.04
+LABEL Description="Build environment"
+
+# To run dpkg (behind other tools like Apt) without interactive dialogue
+ARG DEBIAN_FRONTEND=noninteractive
+
+ARG LIBOPENTOK_VERSION=2.26.0
+
+ENV HOME /root
+
+SHELL ["/bin/bash", "-c"]
+
+RUN apt-get update && apt-get -yq --no-install-recommends install \
+    build-essential \
+    clang \
+    curl  \
+    gdb \
+    wget \
+    git \
+    zip \
+    unzip \
+    tar \
+    pkg-config \
+    valgrind
+
+RUN apt-get update && apt-get install -y gcc-10 g++-10
+
+# Set the alternative for GCC and G++ to version 10
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 10
+RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10
+
+# Set GCC and G++ 10 as the default versions
+RUN update-alternatives --config gcc
+RUN update-alternatives --config g++
+
+RUN apt-get install -y --reinstall ca-certificates
+
+# Download and install desired version of CMake
+ARG CMAKE_VERSION=3.26.5
+
+RUN wget https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION-Linux-x86_64.sh -O /tmp/cmake-install.sh
+RUN chmod u+x /tmp/cmake-install.sh
+RUN mkdir /opt/cmake-$CMAKE_VERSION
+RUN /tmp/cmake-install.sh --skip-license --prefix="/opt/cmake-$CMAKE_VERSION"
+RUN rm /tmp/cmake-install.sh
+RUN ln -s /opt/cmake-$CMAKE_VERSION/bin/* /usr/local/bin
+
+# Clean up
+RUN rm -rf "cmake-$CMAKE_VERSION-linux-x86_64*"
+
+########################################################
+# Add custom packages and development environment here
+########################################################
+
+# OpenTok Linux SDK
+
+RUN wget https://tokbox.com/downloads/libopentok_linux_llvm_x86_64-$LIBOPENTOK_VERSION && \
+    tar xvf libopentok_linux_llvm_x86_64-$LIBOPENTOK_VERSION && \
+    mv libopentok_linux_llvm_x86_64 /usr/local/src/
+
+ENV LIBOPENTOK_PATH /usr/local/src/libopentok_linux_llvm_x86_64
+
+# link libopentok.so into default location
+RUN ln -s /usr/local/src/libopentok_linux_llvm_x86_64/lib/libopentok.so /lib/libopentok.so
+
+#RUN apt-get update && apt-get upgrade -y
+
+# Install library dependencies
+
+RUN apt-get -yq --no-install-recommends install \
+                    libc++-dev \
+                    libc++abi-dev \
+                    libgstreamer1.0-dev \
+                    libgstreamer-plugins-base1.0-dev \
+                    libgstreamer-plugins-bad1.0-dev \
+                    gstreamer1.0-plugins-base \
+                    gstreamer1.0-plugins-good \
+                    gstreamer1.0-plugins-bad \
+                    gstreamer1.0-libav \
+                    gstreamer1.0-tools
+
+########################################################

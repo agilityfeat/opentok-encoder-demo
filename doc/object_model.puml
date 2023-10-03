@@ -1,0 +1,34 @@
+@startuml
+
+class OpenTokClient {
+}
+
+package opentok_linux_sdk {
+
+    class otc_session {
+    }
+    class otc_publisher
+    struct otc_video_capturer_callbacks
+    struct otc_audio_device_callbacks
+
+    otc_video_capturer_callbacks -[hidden]- otc_publisher
+    otc_publisher -[hidden] otc_session
+    otc_publisher -[hidden] otc_audio_device_callbacks
+}
+
+class OpenTokVideoPublisher {
+}
+
+class OpenTokAudioPublisher {
+}
+
+OpenTokClient *-up- otc_session
+OpenTokClient *-up- OpenTokVideoPublisher
+OpenTokClient *-up- OpenTokAudioPublisher
+
+OpenTokVideoPublisher *-up- otc_publisher
+OpenTokVideoPublisher o-up- otc_video_capturer_callbacks
+
+OpenTokAudioPublisher o-up- otc_audio_device_callbacks
+
+@enduml
