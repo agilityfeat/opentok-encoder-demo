@@ -3,16 +3,16 @@
 class OpenTokClient {
 }
 
-package opentok_linux_sdk {
-
+package libopentok {
     class otc_session {
     }
     class otc_publisher
+    struct otc_session_callbacks
     struct otc_video_capturer_callbacks
     struct otc_audio_device_callbacks
 
+    otc_session_callbacks -[hidden]- otc_session
     otc_video_capturer_callbacks -[hidden]- otc_publisher
-    otc_publisher -[hidden] otc_session
     otc_publisher -[hidden] otc_audio_device_callbacks
 }
 
@@ -23,6 +23,7 @@ class OpenTokAudioPublisher {
 }
 
 OpenTokClient *-up- otc_session
+OpenTokClient o-up- otc_session_callbacks
 OpenTokClient *-up- OpenTokVideoPublisher
 OpenTokClient *-up- OpenTokAudioPublisher
 

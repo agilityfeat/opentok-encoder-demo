@@ -1,5 +1,15 @@
 # OpenTok Encoder
 
+## Configuration
+
+Create `.env` file with the following parameters filled out:
+
+```shell
+API_KEY=<OPENTOK_PROJECT_API_KEY>
+SESSION_ID=<OPENTOK_SESSION_ID>
+TOKEN=<OPENTOK_SESSION_TOKEN>
+```
+
 ## Development Dockerfile
 
 Building image
