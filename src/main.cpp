@@ -133,8 +133,8 @@ private:
         _this->isPublishing_ = true;
         while (!_this->exitAudioCapturerThread.load()) {
             for (int i = 0; i < 480; i++) {
-                double val = (INT16_MAX  * 0.75) * cos(2.0 * M_PI * 4.0 * time / 10.0 );
-                samples[i] = (int16_t)val;
+                double val = (INT16_MAX * 0.75) * cos(2.0 * M_PI * 4.0 * time / 10.0);
+                samples[i] = (int16_t) val;
                 time += 10.0 / 480.0;
             }
             otc_audio_device_write_capture_data(samples, 480);
@@ -160,8 +160,10 @@ private:
         return OTC_TRUE;
     }
 
-    static otc_bool audio_device_start_capturer(const otc_audio_device *audio_device,
-                                                void *user_data) {
+    static otc_bool audio_device_start_capturer(
+            const otc_audio_device *audio_device,
+            void *user_data
+    ) {
         auto _this = static_cast<OpenTokAudioPublisher *>(user_data);
         if (_this == nullptr) {
             return OTC_FALSE;
@@ -170,7 +172,11 @@ private:
         _this->logger.debug(__FUNCTION__);
 
         _this->exitAudioCapturerThread = false;
-        if (otk_thread_create(&(_this->audioCapturerThread), &capturer_thread_start_function, user_data) != 0) {
+        if (otk_thread_create(
+                &(_this->audioCapturerThread),
+                &capturer_thread_start_function,
+                user_data
+        ) != 0) {
             return OTC_FALSE;
         }
 
@@ -288,12 +294,15 @@ private:
         _this->logger.debug(__FUNCTION__);
         _this->isPublishing_ = true;
 
-        auto buffer = (uint8_t *) malloc(sizeof(uint8_t) * OpenTokVideoPublisher::width * OpenTokVideoPublisher::height * 4);
+        auto buffer = (uint8_t *) malloc(
+                sizeof(uint8_t) * OpenTokVideoPublisher::width * OpenTokVideoPublisher::height * 4);
 
         while (!_this->exitVideoCapturerThread.load()) {
-            memset(buffer, generate_random_integer() & 0xFF, OpenTokVideoPublisher::width * OpenTokVideoPublisher::height * 4);
+            memset(buffer, generate_random_integer() & 0xFF,
+                   OpenTokVideoPublisher::width * OpenTokVideoPublisher::height * 4);
 
-            auto otcFrame = otc_video_frame_new(OTC_VIDEO_FRAME_FORMAT_ARGB32, OpenTokVideoPublisher::width, OpenTokVideoPublisher::height, buffer);
+            auto otcFrame = otc_video_frame_new(OTC_VIDEO_FRAME_FORMAT_ARGB32, OpenTokVideoPublisher::width,
+                                                OpenTokVideoPublisher::height, buffer);
             if (otc_video_capturer_provide_frame(_this->videoCapturer, 0, otcFrame) != OTC_SUCCESS) {
                 _this->logger.error("capturer_thread_start_function: Unable to provide frame");
             }
@@ -372,22 +381,22 @@ private:
     static void on_publisher_stream_created(otc_publisher *publisher,
                                             void *user_data,
                                             const otc_stream *stream) {
-        auto _this = static_cast<OpenTokVideoPublisher*>(user_data);
+        auto _this = static_cast<OpenTokVideoPublisher *>(user_data);
         _this->logger.debug(__FUNCTION__);
     }
 
     static void on_publisher_stream_destroyed(otc_publisher *publisher,
                                               void *user_data,
                                               const otc_stream *stream) {
-        auto _this = static_cast<OpenTokVideoPublisher*>(user_data);
+        auto _this = static_cast<OpenTokVideoPublisher *>(user_data);
         _this->logger.debug(__FUNCTION__);
     }
 
     static void on_publisher_error(otc_publisher *publisher,
                                    void *user_data,
-                                   const char* error_string,
+                                   const char *error_string,
                                    enum otc_publisher_error_code error_code) {
-        auto _this = static_cast<OpenTokVideoPublisher*>(user_data);
+        auto _this = static_cast<OpenTokVideoPublisher *>(user_data);
         _this->logger.error("{}: Publisher error. Error code: {}", __FUNCTION__, error_string);
     }
 
@@ -409,7 +418,8 @@ private:
 class OpenTokClient {
 public:
     OpenTokClient(std::string apiKey, std::string sessionId, std::string token) : apiKey(std::move(apiKey)),
-                                                               sessionId(std::move(sessionId)), token(std::move(token)) {
+                                                                                  sessionId(std::move(sessionId)),
+                                                                                  token(std::move(token)) {
         if (otc_init(nullptr) != OTC_SUCCESS) {
             throw std::runtime_error("Could not init opentok library");
         }
@@ -563,6 +573,7 @@ private:
         auto _this = static_cast<OpenTokClient *>(user_data);
         _this->logger.debug("{}: {}", __FUNCTION__, error_string);
     }
+
     std::string apiKey;
     std::string sessionId;
     std::string token;
