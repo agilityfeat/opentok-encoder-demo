@@ -44,3 +44,48 @@ make
 # Run binary, can set run time environment variables here
 ./streamer
 ```
+
+# Proxy Server
+
+## SRS
+
+### Repo
+
+https://github.com/ossrs/srs
+
+### Documentation
+
+https://ossrs.io/lts/en-us/docs/v5/doc/getting-started#webrtc
+
+### Setup
+
+Set the `candidate` variable (see: https://ossrs.io/lts/en-us/docs/v5/doc/webrtc#config-candidate)
+
+```shell
+# For macOS
+CANDIDATE=$(ifconfig en0 inet | grep 'inet ' | awk '{print $2}')
+
+# For CentOS
+CANDIDATE=$(ifconfig eth0 | grep 'inet '| awk '{print $2}')
+
+# Directly set ip.
+CANDIDATE="192.168.3.10"
+```
+
+Run docker container:
+
+```shell
+export CANDIDATE=$(ifconfig en0 inet | grep 'inet ' | awk '{print $2}')
+docker run --rm --env CANDIDATE=$CANDIDATE \
+  -p 1935:1935 -p 8080:8080 -p 1985:1985 -p 8000:8000/udp \
+  ossrs/srs:5 \
+  objs/srs -c conf/rtmp.conf
+```
+
+Use ffmpeg to stream video:
+
+```shell
+ffmpeg -stream_loop -1 -re -i ~/Downloads/timer.mp4 -c copy -f flv rtmp://localhost/live/livestream
+```
+
+Use VLC or some other media player to play back RTMP stream from URL: `rtmp://localhost/live/livestream`
